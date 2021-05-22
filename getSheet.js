@@ -1,7 +1,7 @@
 const fs=require('fs');
 const {get,set}=require('lodash');
 const googleSheet=require('./googleSheet');
-const credentials=require('../../credentials.json');
+const credentials=require('./credentials.json');
 
 function stdGetSaveToken(credentialRepo, userName,token) {
   const path=['googleSheet', userName];
