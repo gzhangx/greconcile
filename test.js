@@ -54,6 +54,9 @@ async function test() {
             if (d[2].indexOf('(') >= 0) {
                 d[2] = '-'+d[2].replace(/[\(\)]/g, '');
             }
+            if (d[0].length <= 5) {
+                d[0] += '/2021';
+            }
             return {
                 date: moment(d[0]),
                 amount: d[2],
@@ -62,18 +65,30 @@ async function test() {
         }
         return null;
     }).filter(x=>x);
-    console.log(jlData);
-    console.log(cardData.filter(d => d.isPayment))
+    //console.log(jlData);
+    //console.log(cardData.filter(d => d.isPayment))
     
     const doMatch = (dateCmp) => {
         cardData.filter(cd => !cd.matched && !cd.isPayment).map(cd => {
             const amountMatches = jlData.filter(jd => jd.amount === cd.amount && !jd.matched);
             if (amountMatches.length === 0) {
-                console.log(`card data no match on amount ${cd.amount} ${cd.tdate.format('YYYY-MM-DD')} ${cd.type} ${cd.category} ${cd.desc}`)
+                console.log(`card data no match on amount ${cd.amount} ${cd.tdate.format('YYYY-MM-DD')} ${cd.type} ${cd.category} ${cd.desc}`);
+                cd.noMatch = 'no amount found';
+                return;
+            }
+            const dateMatched = amountMatches.filter(jd => dateCmp(jd, cd) && !jd.matched)[0];
+            if (dateMatched) {
+                cd.matched = dateMatched;
+                dateMatched.matched = cd;
+            } else {
+                console.log(`card data no match on date ${cd.amount} ${cd.tdate.format('YYYY-MM-DD')} ${cd.type} ${cd.category} ${cd.desc}`);
+                cd.noMatch = 'no date found';
             }
         });
     }
-    doMatch();
+    doMatch((jd, cd) => {
+        return jd.date.isSameOrBefore(cd.pdate) && jd.date.isSameOrAfter(cd.tdate.add(-4, 'days'));
+    });
 }
 
 test();
