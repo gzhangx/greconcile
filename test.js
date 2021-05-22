@@ -1,5 +1,6 @@
 const fs = require('fs');
 const moment = require('moment');
+const { sum } = require('lodash');
 const gs = require('./getSheet');
 
 function saveGsToJson(fname, data) {
@@ -57,10 +58,13 @@ async function test() {
             if (d[0].length <= 5) {
                 d[0] += '/2021';
             }
-            return {
+            return {                
                 date: moment(d[0]),
                 amount: d[2],
-                isCr: d[7] === 'cr'
+                isCr: d[7] === 'cr',
+                merchant: d[1],
+                desc: d[4],
+                person: d[5],
             };
         }
         return null;
@@ -89,6 +93,15 @@ async function test() {
     doMatch((jd, cd) => {
         return jd.date.isSameOrBefore(cd.pdate) && jd.date.isSameOrAfter(cd.tdate.add(-4, 'days'));
     });
+
+
+    const total = cardData.filter(d => d.noMatch).reduce((acc,d) => acc+parseFloat(d.amount),0);
+    console.log(`lost total ${total}`);
+
+    const extrasOnJl = jlData.filter(j => j.isCr && !j.matched);
+    console.log(extrasOnJl.map(j => `${j.date.format('YYYY-MM-DD')}, ${j.amount}, ${j.merchant}, ${j.desc}, ${j.person}`));
+    const extraTotal = sum(extrasOnJl.map(d=>parseFloat(d.amount)))
+    console.log(`total extra= ${extraTotal}`)
 }
 
 test();
