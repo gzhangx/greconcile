@@ -1,6 +1,6 @@
 const fs = require('fs');
 const moment = require('moment');
-const { sum } = require('lodash');
+const { sum, max, min } = require('lodash');
 const gs = require('./getSheet');
 
 function saveGsToJson(fname, data) {
@@ -49,7 +49,7 @@ async function test() {
             isPayment: type === 'Payment'
         }
     });
-    const jlData = loadGsJson(jlDataFileName).filter(d => d).map(d => {
+    const jlData = loadGsJson(jlDataFileName).map((d,row) => {
         if (d[2]) {
             d[2] = d[2].replace(/[\$,]/g, '').trim();
             if (d[2].indexOf('(') >= 0) {
@@ -58,7 +58,8 @@ async function test() {
             if (d[0].length <= 5) {
                 d[0] += '/2021';
             }
-            return {                
+            return {
+                row: row+1,
                 date: moment(d[0]),
                 amount: d[2],
                 isCr: d[7] === 'cr',
@@ -99,9 +100,37 @@ async function test() {
     console.log(`lost total ${total}`);
 
     const extrasOnJl = jlData.filter(j => j.isCr && !j.matched);
-    console.log(extrasOnJl.map(j => `${j.date.format('YYYY-MM-DD')}, ${j.amount}, ${j.merchant}, ${j.desc}, ${j.person}`));
+    extrasOnJl.map(j => {
+        console.log(`${j.date.format('YYYY-MM-DD')}, ${j.row}, ${j.amount}, ${j.merchant}, ${j.desc}, ${j.person}`);
+        //&& jj.date.diff(j.date)===0
+        jlData.filter(jj => jj.amount === j.amount  && j !== jj).map(dj => {
+            //console.log(`--->${dj.date.format('YYYY-MM-DD')}, ${j.date.format('YYYY-MM-DD')}, ${dj.row}, ${dj.amount}, ${dj.merchant}, ${dj.desc}, ${dj.person}`);
+        })
+    });
     const extraTotal = sum(extrasOnJl.map(d=>parseFloat(d.amount)))
-    console.log(`total extra= ${extraTotal}`)
+    console.log(`total extra= ${extraTotal}`);
+
+    const sheet = gs.createSheet();        
+    const getMinMax = extrasOnJl => {
+        const minRow = min(extrasOnJl);
+        const maxRow = max(extrasOnJl);
+        console.log(extrasOnJl);
+        console.log(maxRow)
+        const data = [];
+        for (let i = 0; i < (maxRow - minRow + 1); i++) data[i] = [''];
+        extrasOnJl.forEach(r => {
+            data[r - minRow ] = ['dup'];
+        })
+        return {
+            minRow,
+            maxRow,
+            data
+        }
+    }
+    const mm = getMinMax(extrasOnJl.map(j=>j.row));
+    console.log(`${mm.minRow} ${mm.maxRow} ${mm.data.length}`)
+    console.log(mm.data)
+    await sheet.updateSheet('1kBhGYV6GdomJXYdAjSbTQSzmtsjU2zSJnlrBIWTmc2M', `MaintainessRecord!G${mm.minRow}:G${mm.maxRow}`, mm.data)
 }
 
 test();
