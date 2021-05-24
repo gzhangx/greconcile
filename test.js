@@ -33,10 +33,7 @@ async function test() {
         const category = d[3];
         const type = d[4];
         const revAmount = amt => {
-            if (amt.indexOf('-') >= 0) {
-                return amt.replace('-', '');
-            }
-            return `-${amt}`;
+            return (-parseFloat(amt)).toFixed(2)            
         }
         const amount = revAmount(d[5]);
         return {
@@ -55,6 +52,7 @@ async function test() {
             if (d[2].indexOf('(') >= 0) {
                 d[2] = '-'+d[2].replace(/[\(\)]/g, '');
             }
+            d[2] = parseFloat(d[2]).toFixed(2)
             if (d[0].length <= 5) {
                 d[0] += '/2021';
             }
