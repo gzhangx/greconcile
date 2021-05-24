@@ -96,8 +96,15 @@ async function test() {
     });
 
 
+    console.log('================== items on card but not on jl ==================');
+    cardData.filter(j => j.noMatch).map(cd => {
+        console.log(`${cd.tdate.format('YYYY-MM-DD')},${cd.amount}, ${cd.type}, ${cd.category}, ${cd.desc}`);
+    })
     const total = cardData.filter(d => d.noMatch).reduce((acc,d) => acc+parseFloat(d.amount),0);
     console.log(`total of items on card but not on jl ${total}`);
+    console.log('================== items on card but not on jl ==================');
+    console.log()
+    console.log()
 
     const extrasOnJl = jlData.filter(j => j.isCr && !j.matched);
     extrasOnJl.map(j => {
@@ -107,7 +114,7 @@ async function test() {
             //console.log(`--->${dj.date.format('YYYY-MM-DD')}, ${j.date.format('YYYY-MM-DD')}, ${dj.row}, ${dj.amount}, ${dj.merchant}, ${dj.desc}, ${dj.person}`);
         })
     });
-    const extraTotal = sum(extrasOnJl.map(d=>parseFloat(d.amount)))
+    const extraTotal = sum(extrasOnJl.map(d => parseFloat(d.amount)))    
     console.log(`total extra on jlsheet= ${extraTotal}`);
 
     const sheet = gs.createSheet();        
