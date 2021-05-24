@@ -97,7 +97,7 @@ async function test() {
 
 
     const total = cardData.filter(d => d.noMatch).reduce((acc,d) => acc+parseFloat(d.amount),0);
-    console.log(`lost total ${total}`);
+    console.log(`total of items on card but not on jl ${total}`);
 
     const extrasOnJl = jlData.filter(j => j.isCr && !j.matched);
     extrasOnJl.map(j => {
@@ -108,14 +108,14 @@ async function test() {
         })
     });
     const extraTotal = sum(extrasOnJl.map(d=>parseFloat(d.amount)))
-    console.log(`total extra= ${extraTotal}`);
+    console.log(`total extra on jlsheet= ${extraTotal}`);
 
     const sheet = gs.createSheet();        
     const getMinMax = extrasOnJl => {
         const minRow = min(extrasOnJl);
         const maxRow = max(extrasOnJl);
-        console.log(extrasOnJl);
-        console.log(maxRow)
+        //console.log(extrasOnJl);
+        //console.log(maxRow)
         const data = [];
         for (let i = 0; i < (maxRow - minRow + 1); i++) data[i] = [''];
         extrasOnJl.forEach(r => {
@@ -128,9 +128,9 @@ async function test() {
         }
     }
     const mm = getMinMax(extrasOnJl.map(j=>j.row));
-    console.log(`${mm.minRow} ${mm.maxRow} ${mm.data.length}`)
-    console.log(mm.data)
-    await sheet.updateSheet('1kBhGYV6GdomJXYdAjSbTQSzmtsjU2zSJnlrBIWTmc2M', `MaintainessRecord!G${mm.minRow}:G${mm.maxRow}`, mm.data)
+    //console.log(`${mm.minRow} ${mm.maxRow} ${mm.data.length}`)
+    //console.log(mm.data)
+    //await sheet.updateSheet('1kBhGYV6GdomJXYdAjSbTQSzmtsjU2zSJnlrBIWTmc2M', `MaintainessRecord!G${mm.minRow}:G${mm.maxRow}`, mm.data)
 }
 
 test();
