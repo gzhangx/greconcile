@@ -59,7 +59,7 @@ async function test() {
                 row: row+1,
                 date: moment(d[0]),
                 amount: d[2],
-                isCr: d[7] === 'cr',
+                isCr: d[6] === 'cr',
                 merchant: d[1],
                 desc: d[4],
                 person: d[5],
@@ -102,8 +102,29 @@ async function test() {
     console.log('================== items on card but not on jl ==================');
     console.log()
     console.log()
+    const getMinMax = (rows, tag) => {
+        const minRow = min(rows);
+        const maxRow = max(rows);
+        const data = [];
+        for (let i = 0; i < (maxRow - minRow + 1); i++) data[i] = [''];
+        rows.forEach(r => {
+            data[r - minRow] = [tag];
+        })
+        return {
+            minRow,
+            maxRow,
+            data
+        }
+    }
+    const jlMatchedToCard = getMinMax(jlData.filter(d => d.matched).map(j => j.row), 'ccard');
+    if (jlMatchedToCard.data.length) {
+        console.log(`${jlMatchedToCard.minRow} ${jlMatchedToCard.maxRow} ${jlMatchedToCard.data.length}`)
+        console.log(jlMatchedToCard.data)
+        const sheet = gs.createSheet();
+        await sheet.updateSheet('1kBhGYV6GdomJXYdAjSbTQSzmtsjU2zSJnlrBIWTmc2M', `MaintainessRecord!G${jlMatchedToCard.minRow}:G${jlMatchedToCard.maxRow}`, jlMatchedToCard.data)
+    }
 
-    const extrasOnJl = jlData.filter(j => j.isCr && !j.matched);
+    const extrasOnJl = jlData.filter(j =>  !j.matched); //j.isCr &&
     extrasOnJl.map(j => {
         console.log(`${j.date.format('YYYY-MM-DD')}, ${j.row}, ${j.amount}, ${j.merchant}, ${j.desc}, ${j.person}`);
         //&& jj.date.diff(j.date)===0
@@ -114,23 +135,8 @@ async function test() {
     const extraTotal = sum(extrasOnJl.map(d => parseFloat(d.amount)))    
     console.log(`total extra on jlsheet= ${extraTotal}`);
     
-    const getMinMax = extrasOnJl => {
-        const minRow = min(extrasOnJl);
-        const maxRow = max(extrasOnJl);
-        //console.log(extrasOnJl);
-        //console.log(maxRow)
-        const data = [];
-        for (let i = 0; i < (maxRow - minRow + 1); i++) data[i] = [''];
-        extrasOnJl.forEach(r => {
-            data[r - minRow ] = ['dup'];
-        })
-        return {
-            minRow,
-            maxRow,
-            data
-        }
-    }
-    const mm = getMinMax(extrasOnJl.map(j => j.row));
+    
+    const mm = getMinMax(extrasOnJl.map(j => j.row),'nomatch');
     if (mm.data.length) {
         //console.log(`${mm.minRow} ${mm.maxRow} ${mm.data.length}`)
         //console.log(mm.data)
