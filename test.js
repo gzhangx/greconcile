@@ -9,24 +9,23 @@ function saveGsToJson(fname, data) {
 function loadGsJson(fname) {
     return JSON.parse(fs.readFileSync(fname));
 }
+
+function loadCSV() {
+    const fsStr = fs.readFileSync('Chase7478_2021y2d.CSV').toString().split('\n');
+    return fsStr.slice(1).filter(x=>x).map(f=>f.split(','))
+}
 async function test() {
     
-    const cardStatementDataFileName = 'cardStatement.json';
     const jlDataFileName = 'jlStatement.json';
-    /*
-    const sheet = gs.createSheet();
-    const cardStatementData = await sheet.readSheet('1sKppFHJy_MRRgHuV2PzhliSzuje7O0Rb-ntiOrLDVPA', 'ChaseCard!A:F')
-    //console.log(cardStatementData.data.values);
-    saveGsToJson(cardStatementDataFileName, cardStatementData);
-
     
-
-    const jlData = await sheet.readSheet('1kBhGYV6GdomJXYdAjSbTQSzmtsjU2zSJnlrBIWTmc2M', 'MaintainessRecord!A:H')
+    /*
+    const jlSheetData = await gs.createSheet().readSheet('1kBhGYV6GdomJXYdAjSbTQSzmtsjU2zSJnlrBIWTmc2M', 'MaintainessRecord!A:H')
     //console.log(jlData.data.values);
-    saveGsToJson(jlDataFileName, jlData);
+    console.log(`saving ${jlDataFileName}`);
+    saveGsToJson(jlDataFileName, jlSheetData);
     */
     
-    const cardData = loadGsJson(cardStatementDataFileName).map(d => {
+    const cardData = loadCSV().map(d => {
         const tdate = moment(d[0]);
         const pdate = moment(d[1]);
         const desc = d[2];
@@ -114,8 +113,7 @@ async function test() {
     });
     const extraTotal = sum(extrasOnJl.map(d => parseFloat(d.amount)))    
     console.log(`total extra on jlsheet= ${extraTotal}`);
-
-    const sheet = gs.createSheet();        
+    
     const getMinMax = extrasOnJl => {
         const minRow = min(extrasOnJl);
         const maxRow = max(extrasOnJl);
@@ -135,6 +133,7 @@ async function test() {
     const mm = getMinMax(extrasOnJl.map(j=>j.row));
     //console.log(`${mm.minRow} ${mm.maxRow} ${mm.data.length}`)
     //console.log(mm.data)
+    //const sheet = gs.createSheet();
     //await sheet.updateSheet('1kBhGYV6GdomJXYdAjSbTQSzmtsjU2zSJnlrBIWTmc2M', `MaintainessRecord!G${mm.minRow}:G${mm.maxRow}`, mm.data)
 }
 
