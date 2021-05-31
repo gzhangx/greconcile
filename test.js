@@ -124,7 +124,7 @@ async function test() {
         await sheet.updateSheet('1kBhGYV6GdomJXYdAjSbTQSzmtsjU2zSJnlrBIWTmc2M', `MaintainessRecord!G${jlMatchedToCard.minRow}:G${jlMatchedToCard.maxRow}`, jlMatchedToCard.data)
     }
 
-    const extrasOnJl = jlData.filter(j =>  !j.matched); //j.isCr &&
+    const extrasOnJl = jlData.filter(j => j.isCr && !j.matched); //
     extrasOnJl.map(j => {
         console.log(`${j.date.format('YYYY-MM-DD')}, ${j.row}, ${j.amount}, ${j.merchant}, ${j.desc}, ${j.person}`);
         //&& jj.date.diff(j.date)===0
