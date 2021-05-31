@@ -59,7 +59,7 @@ async function test() {
                 row: row+1,
                 date: moment(d[0]),
                 amount: d[2],
-                isCr: d[6] === 'cr',
+                isCr: d[6] === 'ccard',
                 merchant: d[1],
                 desc: d[4],
                 person: d[5],
