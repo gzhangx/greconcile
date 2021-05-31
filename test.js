@@ -130,11 +130,13 @@ async function test() {
             data
         }
     }
-    const mm = getMinMax(extrasOnJl.map(j=>j.row));
-    //console.log(`${mm.minRow} ${mm.maxRow} ${mm.data.length}`)
-    //console.log(mm.data)
-    //const sheet = gs.createSheet();
-    //await sheet.updateSheet('1kBhGYV6GdomJXYdAjSbTQSzmtsjU2zSJnlrBIWTmc2M', `MaintainessRecord!G${mm.minRow}:G${mm.maxRow}`, mm.data)
+    const mm = getMinMax(extrasOnJl.map(j => j.row));
+    if (mm.data.length) {
+        //console.log(`${mm.minRow} ${mm.maxRow} ${mm.data.length}`)
+        //console.log(mm.data)
+        //const sheet = gs.createSheet();
+        //await sheet.updateSheet('1kBhGYV6GdomJXYdAjSbTQSzmtsjU2zSJnlrBIWTmc2M', `MaintainessRecord!G${mm.minRow}:G${mm.maxRow}`, mm.data)
+    }
 }
 
 test();
