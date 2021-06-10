@@ -62,7 +62,7 @@ function parseCsvLine(str) {
     }
     return res.allRess;
 }
-const lines = parseCsvLine(fs.readFileSync('./MaintainessRecord.csv').toString()).slice(1).map(d => {
+const datas = parseCsvLine(fs.readFileSync('./MaintainessRecord.csv').toString()).slice(1).map(d => {
     //console.log(d)
     let amount = parseFloat(d[1].trim().replace(/[$,]/g,'').trim() || '0');
     return {
@@ -72,4 +72,34 @@ const lines = parseCsvLine(fs.readFileSync('./MaintainessRecord.csv').toString()
         worker:d[3],
     }
 });
-console.log(lines.map(l=>l.amount))
+
+const cutOff = moment('2020-11-01');
+const ignoreCats = {
+    'Commission Fee':true,
+    'Management fee': true,
+    'Lawn Maintenance': true,
+    'Development Work': true,
+}
+
+const ignames = require('./names.json');
+const cignores = {
+    'Repair': true,
+    'Supplies': true,
+}
+
+datas.reduce((acc, data) => {
+    if (moment(data.date).isAfter(cutOff)) return acc;
+    if (ignoreCats[data.cat]) return acc;
+    if (data.worker === ignames.ingoreName) {        
+        if (cignores[data.cat]) {
+            console.log(`ignore ${ignames.ingoreName} of ${data.cat}`);
+            return acc;
+        }
+    }
+    acc.total += data.amount;
+    acc.total = Math.round(acc.total * 100) / 100.0;
+    console.log(`${data.date} amt=${data.amount} total=${acc.total}`);
+    return acc;
+}, {
+    total:0,
+})
