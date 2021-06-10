@@ -89,29 +89,36 @@ const cignores = {
     'Supplies': true,
 }
 
-const mm = datas.reduce((acc, data) => {
-    if (moment(data.date).isAfter(cutOff)) return acc;
-    if (ignoreCats[data.cat]) return acc;
-    if (!data.amount) return;
-    if (data.worker === ignames.ingoreName) {        
-        if (cignores[data.cat]) {
-            console.log(`ignore ${ignames.ingoreName} of ${data.cat}`);
-            return acc;
+async function test() {
+    const mm = datas.reduce((acc, data) => {
+        if (moment(data.date).isAfter(cutOff)) return acc;
+        if (ignoreCats[data.cat]) return acc;
+        if (!data.amount) return acc;
+        if (data.worker === ignames.ingoreName) {
+            if (cignores[data.cat]) {
+                console.log(`ignore ${ignames.ingoreName} of ${data.cat}`);
+                return acc;
+            }
         }
-    }
-    acc.maxRow++;
-    acc.total += data.amount;
-    acc.total = Math.round(acc.total * 100) / 100.0;
-    console.log(`${data.date} amt=${data.amount} total=${acc.total} ${data.house} ${data.desc}`);
+        acc.maxRow++;
+        acc.total += data.amount;
+        acc.total = Math.round(acc.total * 100) / 100.0;
+        console.log(`${data.date} amt=${data.amount} total=${acc.total} ${data.house} ${data.desc}`);
     
-    acc.rows.push([data.date, data.amount, data.cat, data.worker, data.house, data.desc, data.total])
-    return acc;
-}, {
-    total: 0,
-    minRow: 1,
-    maxRow: 0,
-    rows:[],
-})
+        acc.rows.push([data.date, data.amount, data.cat, data.worker, data.house, data.desc, acc.total])
+        return acc;
+    }, {
+        total: 0,
+        minRow: 1,
+        maxRow: 0,
+        rows: [],
+    })
 
-const sheet = gs.createSheet();
-sheet.updateSheet('1f2mBuxGUewyoFRHsE-Igloc9OQ1jK_L6SSvrpe6avb0', `export!A${mm.minRow}:G${mm.maxRow}`, mm.data)
+
+    const sheet = gs.createSheet();
+    await sheet.updateSheet('1f2mBuxGUewyoFRHsE-Igloc9OQ1jK_L6SSvrpe6avb0', `export!A${mm.minRow}:G${mm.maxRow}`, mm.rows);
+}
+
+test().then(() => {
+    console.log('done');
+})
