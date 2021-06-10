@@ -1,6 +1,6 @@
 const fs = require('fs');
 const moment = require('moment');
-
+const gs = require('../getSheet');
 function parseCsvLine(str) {
     const res = str.split('').reduce((acc, c) => {
         while (true) {
@@ -69,7 +69,9 @@ const datas = parseCsvLine(fs.readFileSync('./MaintainessRecord.csv').toString()
         date: moment(d[0]).format('YYYY-MM-DD'),
         amount,
         cat: d[2],
-        worker:d[3],
+        worker: d[3],
+        house: d[4],
+        desc: d[5],
     }
 });
 
@@ -87,19 +89,29 @@ const cignores = {
     'Supplies': true,
 }
 
-datas.reduce((acc, data) => {
+const mm = datas.reduce((acc, data) => {
     if (moment(data.date).isAfter(cutOff)) return acc;
     if (ignoreCats[data.cat]) return acc;
+    if (!data.amount) return;
     if (data.worker === ignames.ingoreName) {        
         if (cignores[data.cat]) {
             console.log(`ignore ${ignames.ingoreName} of ${data.cat}`);
             return acc;
         }
     }
+    acc.maxRow++;
     acc.total += data.amount;
     acc.total = Math.round(acc.total * 100) / 100.0;
-    console.log(`${data.date} amt=${data.amount} total=${acc.total}`);
+    console.log(`${data.date} amt=${data.amount} total=${acc.total} ${data.house} ${data.desc}`);
+    
+    acc.rows.push([data.date, data.amount, data.cat, data.worker, data.house, data.desc, data.total])
     return acc;
 }, {
-    total:0,
+    total: 0,
+    minRow: 1,
+    maxRow: 0,
+    rows:[],
 })
+
+const sheet = gs.createSheet();
+sheet.updateSheet('1f2mBuxGUewyoFRHsE-Igloc9OQ1jK_L6SSvrpe6avb0', `export!A${mm.minRow}:G${mm.maxRow}`, mm.data)
