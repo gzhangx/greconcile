@@ -3,3 +3,4 @@ node_modules
 jlStatement.json
 cardStatement.json
 Chase7478_2021y2d.CSV
+maintenance/*.csv
