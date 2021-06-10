@@ -62,9 +62,9 @@ function parseCsvLine(str) {
     }
     return res.allRess;
 }
-const lines = parseCsvLine(fs.readFileSync('./MaintainessRecord.csv').toString()).map(d => {
+const lines = parseCsvLine(fs.readFileSync('./MaintainessRecord.csv').toString()).slice(1).map(d => {
     //console.log(d)
-    let amount = d[1].trim().replace(/[$]/g,'').trim();
+    let amount = parseFloat(d[1].trim().replace(/[$,]/g,'').trim() || '0');
     return {
         date: moment(d[0]).format('YYYY-MM-DD'),
         amount,
@@ -72,4 +72,4 @@ const lines = parseCsvLine(fs.readFileSync('./MaintainessRecord.csv').toString()
         worker:d[3],
     }
 });
-console.log(lines.map(l=>l.date+' '+l.amount+' '+l.cat))
+console.log(lines.map(l=>l.amount))
